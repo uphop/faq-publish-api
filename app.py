@@ -5,13 +5,13 @@ import os
 from flask import Flask, jsonify, make_response
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
-from routes import topics_api
+from routes import topics_api, users_api
 
 api = Flask(__name__)
 
 # Init Swagger
 SWAGGER_URL = '/swagger'
-API_URL = '/static/swagger.json'
+API_URL = '/static/swagger.yaml'
 SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
@@ -20,9 +20,10 @@ SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
     }
 )
 
-# Register API blueprint
+# Register API blueprints
 api.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 api.register_blueprint(topics_api.get_blueprint())
+api.register_blueprint(users_api.get_blueprint())
 
 # Default error handlers
 @api.errorhandler(400)

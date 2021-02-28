@@ -13,8 +13,8 @@ def get_blueprint():
 TOPIC_STORE = {
     "8c36e86c-13b9-4102-a44f-646015dfd981": {
         'user_id': u'04cfc704-acb2-40af-a8d3-4611fab54ada',
-        'question': u'Good Book',
-        'answer': u'testuser1@test.com',
+        'question': u'What are you planning to have for a lunch?',
+        'answer': u'I''d love some spaghetti bolognese.',
         'created': (datetime.today() - timedelta(1)).timestamp()
     }
 }
@@ -67,12 +67,12 @@ def get_topics(_user_id):
 
 @topics_api.route('/user/<string:_user_id>/topic/<string:_topic_id>', methods=['GET'])
 def get_record_by_id(_user_id, _topic_id):
-    """Get book request details by it's id
+    """Get topic by it's identifier
     @param _user_id: author's identifier
     @param _topic_id: topic identifier
     @return: 200: a topic as a flask/response object \
     with application/json mimetype.
-    @raise 404: if book request not found
+    @raise 404: if topic is not found
     """
     # TODO: retrieve topics from data store
     if _topic_id not in TOPIC_STORE:
