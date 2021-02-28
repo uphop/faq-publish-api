@@ -1,0 +1,216 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "API for publishing topics (questions / answers) for FAQ assistant.",
+    "version": "1.0.0",
+    "title": "Publish API",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Topic",
+      "description": "CRUD API for managing a list of user's topics."
+    }
+  ],
+  "paths": {
+    "/user/{user_id}/topic": {
+      "get": {
+        "tags": [
+          "Topic"
+        ],
+        "summary": "Returns topics",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the topic's author",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/topics"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Topic"
+        ],
+        "summary": "Create a new topic",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the topic's author",
+            "type": "string"
+          }
+        ],
+        "requestBody": {
+          "description": "Topic POST object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/topicPostBody"
+              }
+            }
+          }
+        },
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/topic_id"
+            }
+          },
+          "400": {
+            "description": "Failed. Bad post data."
+          }
+        }
+      }
+    },
+    "/user/{user_id}/topic/{topic_id}": {
+      "get": {
+        "tags": [
+          "Topic"
+        ],
+        "summary": "Get topic with given identifier",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the topic's author",
+            "type": "string"
+          },
+          {
+            "name": "topic_id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the topic that we want to match",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/topic"
+            }
+          },
+          "400": {
+            "description": "Failed. Misunderstood Request."
+          },
+          "404": {
+            "description": "Failed. Topic not found."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete topic by identifier",
+        "tags": [
+          "Topic"
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the topic's author",
+            "type": "string"
+          },
+          {
+            "name": "topic_id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the topic that we want to match",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/topic_id"
+            }
+          },
+          "400": {
+            "description": "Failed. Misunderstood Request."
+          },
+          "404": {
+            "description": "Failed. Topic not found."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "topic_id": {
+        "properties": {
+          "uuid": {
+            "type": "string"
+          }
+        }
+      },
+      "topicPostBody": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "format": "string"
+          },
+          "answer": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "topic": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "format": "string"
+          },
+          "answer": {
+            "type": "string",
+            "format": "email"
+          },
+          "created": {
+            "type": "string",
+            "format": "number"
+          }
+        }
+      },
+      "topics": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/topic"
+            }
+          }
+        }
+      }
+    }
+  }
+}
