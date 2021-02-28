@@ -2,6 +2,7 @@
 import uuid
 from datetime import datetime, timedelta
 from flask import jsonify, abort, request, Blueprint
+from data.data_store import DataStore
 
 # Init API blueprint
 users_api = Blueprint('users_api', __name__)
@@ -34,17 +35,11 @@ def create_user():
         abort(400)
 
     # Store new user
-    new_uuid = str(uuid.uuid4())
-    user = {
-        'name': data['name'],
-        'created': datetime.now().timestamp()
-    }
-    
-    # TODO: put user into data store
-    USER_STORE[new_uuid] = user
+    data_store = DataStore()
+    user_id = data_store.create_user(data['name'])
 
     # HTTP 201 Created
-    return jsonify({"user_id": new_uuid}), 201
+    return jsonify({"user_id": user_id}), 201
 
 @users_api.route('/user', methods=['GET'])
 def get_users():
