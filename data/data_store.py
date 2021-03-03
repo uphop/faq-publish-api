@@ -1,8 +1,8 @@
+import sqlalchemy as db
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from data.models import User, Topic, Base
-from datetime import datetime, timedelta
-import uuid
+
 
 class DataStore:
     def __init__(self):
@@ -11,7 +11,7 @@ class DataStore:
         # Bind the engine to the metadata of the Base class so that the
         # declaratives can be accessed through a DBSession instance
         Base.metadata.bind = engine
-        
+
         DBSession = sessionmaker(bind=engine)
         # A DBSession() instance establishes all conversations with the database
         # and represents a "staging zone" for all the objects loaded into the
@@ -22,14 +22,25 @@ class DataStore:
         # session.rollback()
         self.session = DBSession()
 
-    def create_user(self, name):
-        new_uuid = str(uuid.uuid4())
-        new_user = User(user_id=new_uuid, name=name, created=datetime.now().timestamp())
-        self.session.add(new_user)
+    def create_user(self, id, name, created):
+        # insert into data store and commit
+        self.session.add(User(user_id=id, name=name, created=created))
         self.session.commit()
 
-        return new_uuid
+    def get_users(self):
+        # select all users
+        return self.session.query(User.name, User.created).all()
 
- 
+    def get_user(self, id):
+        # select user by ID
+        return self.session.query(User.name, User.created).filter(User.user_id == id).one_or_none()
 
+    def delete_user(self, id):
+        # check if user exists
+        user = self.get_user(id)
 
+        # if yes, drop that
+        if not user is None:
+            self.session.query(User).filter(User.user_id == id).delete()
+            self.session.commit()
+            return id
