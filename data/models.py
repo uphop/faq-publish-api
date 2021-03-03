@@ -32,13 +32,4 @@ class Topic(Base):
         self.answer = answer
         self.created = created
 
-# Create an engine that stores data in the local directory's
-# sqlalchemy_example.db file.
-LOCAL_DB_FILE = 'data/local.db'
-engine = create_engine('sqlite:///' + LOCAL_DB_FILE)
-
-# Create all tables in the engine. This is equivalent to "Create Table"
-# statements in raw SQL.
-Base.metadata.create_all(engine)
-
 

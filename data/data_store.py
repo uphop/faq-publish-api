@@ -6,8 +6,15 @@ from data.models import User, Topic, Base
 
 class DataStore:
     def __init__(self):
+        # Create an engine that stores data in the local directory's
+        # sqlalchemy_example.db file.
         LOCAL_DB_FILE = 'data/local.db'
         engine = create_engine('sqlite:///' + LOCAL_DB_FILE)
+
+        # Create all tables in the engine. This is equivalent to "Create Table"
+        # statements in raw SQL.
+        Base.metadata.create_all(engine)
+
         # Bind the engine to the metadata of the Base class so that the
         # declaratives can be accessed through a DBSession instance
         Base.metadata.bind = engine
@@ -21,6 +28,8 @@ class DataStore:
         # revert all of them back to the last commit by calling
         # session.rollback()
         self.session = DBSession()
+
+
 
     def create_user(self, id, name, created):
         # insert into data store and commit
