@@ -14,6 +14,10 @@ class UserService:
         """Creates a new user.
         @param name: the full user's name
         """
+        # check if name is passed
+        if not name or len(name) == 0:
+            return
+
         # check if name not taken yet
         user_with_same_name = self.get_user_by_name(name)
         if len(user_with_same_name) > 0:

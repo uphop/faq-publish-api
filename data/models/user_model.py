@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Table
 from sqlalchemy.orm import relationship, backref
 from data.models.meta import Base
+from data.models.topic_model import Topic
 
 class User(Base):
     __tablename__ = "user"
