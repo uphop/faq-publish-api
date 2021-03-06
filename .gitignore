@@ -129,4 +129,5 @@ dmypy.json
 .pyre/
 
 # Local SQLite database
-/data/local.db
+*.db
+*.sqlite3

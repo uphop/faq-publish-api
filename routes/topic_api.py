@@ -4,11 +4,11 @@ from datetime import datetime, timedelta
 from flask import jsonify, abort, request, Blueprint
 
 # Init API blueprint
-topics_api = Blueprint('topics_api', __name__)
+topic_api = Blueprint('topic_api', __name__)
 
 def get_blueprint():
     """Return the blueprint for the main app module"""
-    return topics_api
+    return topic_api
 
 TOPIC_STORE = {
     "8c36e86c-13b9-4102-a44f-646015dfd981": {
@@ -19,7 +19,7 @@ TOPIC_STORE = {
     }
 }
 
-@topics_api.route('/user/<string:_user_id>/topic', methods=['POST'])
+@topic_api.route('/user/<string:_user_id>/topic', methods=['POST'])
 def create_topic(_user_id):
     """Creates a new FAQ topic.
     @param _user_id: author's identifier
@@ -54,7 +54,7 @@ def create_topic(_user_id):
     # HTTP 201 Created
     return jsonify({"topic_id": new_uuid}), 201
 
-@topics_api.route('/user/<string:_user_id>/topic', methods=['GET'])
+@topic_api.route('/user/<string:_user_id>/topic', methods=['GET'])
 def get_topics(_user_id):
     """Return all active topics
     @param _user_id: author's identifier
@@ -65,7 +65,7 @@ def get_topics(_user_id):
     topics = TOPIC_STORE
     return jsonify(topics)
 
-@topics_api.route('/user/<string:_user_id>/topic/<string:_topic_id>', methods=['GET'])
+@topic_api.route('/user/<string:_user_id>/topic/<string:_topic_id>', methods=['GET'])
 def get_record_by_id(_user_id, _topic_id):
     """Get topic by it's identifier
     @param _user_id: author's identifier
@@ -79,7 +79,7 @@ def get_record_by_id(_user_id, _topic_id):
         abort(404)
     return jsonify(TOPIC_STORE[_topic_id])
 
-@topics_api.route('/user/<string:_user_id>/topic/<string:_topic_id>', methods=['DELETE'])
+@topic_api.route('/user/<string:_user_id>/topic/<string:_topic_id>', methods=['DELETE'])
 def delete_record(_user_id, _topic_id):
     """Delete a topic record
     @param _user_id: author's identifier

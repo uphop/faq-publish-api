@@ -1,20 +1,21 @@
-from data.data_store import DataStore
+from data.datastore.user_topic_data_store import UserTopicDataStore
 import uuid
 from datetime import datetime, timedelta
+from utils import log
 
-
-class UserManager:
+class UserService:
     def __init__(self):
-        pass
+        
+        self.data_store = UserTopicDataStore()
 
     def create_user(self, name):
         id = str(uuid.uuid4())
-        DataStore().create_user(id, name, datetime.now().timestamp())
+        self.data_store.create_user(id, name, datetime.now().timestamp())
         return id
 
     def get_users(self):
         # retrieve users
-        results = DataStore().get_users()
+        results = self.data_store.get_users()
 
         # iterate through results and return
         users = []
@@ -28,7 +29,7 @@ class UserManager:
 
     def get_user(self, id):
         # retrieve user by ID
-        result = DataStore().get_user(id)
+        result = self.data_store.get_user(id)
 
         # if user not found, return None
         if not result is None:
@@ -40,4 +41,4 @@ class UserManager:
             return user
 
     def delete_user(self, id):
-        return DataStore().delete_user(id)
+        return self.data_store.delete_user(id)

@@ -1,18 +1,23 @@
+import os
 import sqlalchemy as db
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from data.models import User, Topic, Base
+from sqlalchemy.ext.declarative import declarative_base
+from data.models.topic_model import Topic
+from data.models.user_model import User
+import logging
 
-
-class DataStore:
+class UserTopicDataStore:
     def __init__(self):
-        # Create an engine that stores data in the local directory's
-        # sqlalchemy_example.db file.
-        LOCAL_DB_FILE = 'data/local.db'
-        engine = create_engine('sqlite:///' + LOCAL_DB_FILE)
+        self.datastore_connection_string = os.environ.get('USER_TOPICS_DATASTORE_CONNECTION_STRING', 'sqlite:///data//datastore/user_topics_local.sqlite3')
+        self.init_datastore()
+        
+    def init_datastore(self):
+        engine = create_engine(self.datastore_connection_string)
 
         # Create all tables in the engine. This is equivalent to "Create Table"
         # statements in raw SQL.
+        Base = declarative_base()
         Base.metadata.create_all(engine)
 
         # Bind the engine to the metadata of the Base class so that the
@@ -28,8 +33,6 @@ class DataStore:
         # revert all of them back to the last commit by calling
         # session.rollback()
         self.session = DBSession()
-
-
 
     def create_user(self, id, name, created):
         # insert into data store and commit

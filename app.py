@@ -2,13 +2,22 @@
 
 import argparse
 import os
+from os.path import join, dirname
+import sys
+import logging
+from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
-from routes import topics_api, users_api
+from routes import topic_api, user_api
+
+# init config
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 
 # Init Flask app
-api = Flask(__name__)
+FLASK_APP_NAME = os.environ.get('FLASK_APP_NAME', 'faq-publish-api')
+api = Flask(FLASK_APP_NAME)
 
 # Init Swagger
 SWAGGER_URL = '/swagger'
@@ -17,14 +26,23 @@ SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
     config={
-        'app_name': "faq-api"
+        'app_name': FLASK_APP_NAME
     }
+)
+
+# Enable loging
+logging.root.handlers = []
+logging.basicConfig(
+    encoding='utf-8',
+    format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
+    level=logging.DEBUG,
+    handlers=[logging.StreamHandler(sys.stdout)]
 )
 
 # Register API blueprints
 api.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
-api.register_blueprint(topics_api.get_blueprint())
-api.register_blueprint(users_api.get_blueprint())
+api.register_blueprint(topic_api.get_blueprint())
+api.register_blueprint(user_api.get_blueprint())
 
 # Default error handlers
 @api.errorhandler(400)
@@ -49,20 +67,11 @@ def handle_500_error(_error):
 
 # Default handler
 if __name__ == '__main__':
-    # parse inbound args
-    parser = argparse.ArgumentParser(
-        description="faq-api")
-    parser.add_argument('--debug', action='store_true',
-                        help="Use flask debug/dev mode with file change reloading")
-    args = parser.parse_args()
-
     # get Flask server config
-    port = int(os.environ.get('PORT', 5000))
+    FLASK_APP_HOST = os.environ.get('FLASK_APP_HOST', '0.0.0.0')
+    FLASK_APP_PORT = int(os.environ.get('FLASK_APP_PORT', 5000))
+    FLASK_APP_DEBUG = eval(os.environ.get('FLASK_APP_DEBUG', 'False'))
 
-    # check for debug mode and launch
-    if args.debug:
-        print("Running in debug mode")
-        cors = CORS(api)
-        api.run(host='0.0.0.0', port=port, debug=True)
-    else:
-        api.run(host='0.0.0.0', port=port, debug=False)
+    # ...and launch
+    api.logger.info(f'Starting API {FLASK_APP_NAME}...')
+    api.run(host=FLASK_APP_HOST, port=FLASK_APP_PORT, debug=FLASK_APP_DEBUG)
