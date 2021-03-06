@@ -7,10 +7,9 @@ import sqlalchemy as db
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from data.models.meta import Base
-from data.models.topic_model import Topic
 from data.models.user_model import User
 
-class UserTopicDataStore:
+class UserDataStore:
     def __init__(self):
         # init engine
         USER_TOPICS_DATASTORE_CONNECTION_STRING = os.environ.get('USER_TOPICS_DATASTORE_CONNECTION_STRING', 'sqlite:///data//datastores/local.sqlite3?check_same_thread=False')

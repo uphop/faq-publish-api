@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timedelta
-from data.datastores.user_topic_data_store import UserTopicDataStore
+from data.datastores.user_data_store import UserDataStore
 
 '''
 Manages user entity.
@@ -8,7 +8,7 @@ Manages user entity.
 class UserService:
     def __init__(self):
         # init data store
-        self.data_store = UserTopicDataStore()
+        self.data_store = UserDataStore()
 
     def create_user(self, name):
         """Creates a new user.
@@ -56,7 +56,8 @@ class UserService:
         result = self.data_store.get_user_by_id(id)
         if not result is None:
             # delete user from data store by ID
-            return self.data_store.delete_user(id)
+            self.data_store.delete_user(id)
+            return id
 
     def map_user(self, id, name, created):
         """Maps data store row to dict.

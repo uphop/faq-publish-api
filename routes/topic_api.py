@@ -2,6 +2,7 @@
 import uuid
 from datetime import datetime, timedelta
 from flask import jsonify, abort, request, Blueprint
+from services.topic_service import TopicService
 
 # Init API blueprint
 topic_api = Blueprint('topic_api', __name__)
@@ -10,14 +11,8 @@ def get_blueprint():
     """Return the blueprint for the main app module"""
     return topic_api
 
-TOPIC_STORE = {
-    "8c36e86c-13b9-4102-a44f-646015dfd981": {
-        'user_id': u'04cfc704-acb2-40af-a8d3-4611fab54ada',
-        'question': u'What are you planning to have for a lunch?',
-        'answer': u'I''d love some spaghetti bolognese.',
-        'created': (datetime.today() - timedelta(1)).timestamp()
-    }
-}
+# Init topic service
+topic_service = TopicService()
 
 @topic_api.route('/user/<string:_user_id>/topic', methods=['POST'])
 def create_topic(_user_id):
@@ -40,19 +35,13 @@ def create_topic(_user_id):
         abort(400)
 
     # Store new question / answer pair
-    new_uuid = str(uuid.uuid4())
-    topic = {
-        'user_id': _user_id,
-        'question': data['question'],
-        'answer': data['answer'],
-        'created': datetime.now().timestamp()
-    }
-    
-    # TODO: put topic into data store
-    TOPIC_STORE[new_uuid] = topic
+    id = topic_service.create_topic(_user_id, data['question'], data['answer'])
+    if not id:
+        # HTTP 409 Conflict
+        abort(409)
 
     # HTTP 201 Created
-    return jsonify({"topic_id": new_uuid}), 201
+    return jsonify({"id": id}), 201
 
 @topic_api.route('/user/<string:_user_id>/topic', methods=['GET'])
 def get_topics(_user_id):
@@ -61,12 +50,12 @@ def get_topics(_user_id):
     @return: 200: an array of all captured topics as a \
     flask/response object with application/json mimetype.
     """
-    # TODO: retrieve topics from data store
-    topics = TOPIC_STORE
+    # Retrieve topics from data store
+    topics = topic_service.get_topics(_user_id)
     return jsonify(topics)
 
 @topic_api.route('/user/<string:_user_id>/topic/<string:_topic_id>', methods=['GET'])
-def get_record_by_id(_user_id, _topic_id):
+def get_topic_by_id(_user_id, _topic_id):
     """Get topic by it's identifier
     @param _user_id: author's identifier
     @param _topic_id: topic identifier
@@ -74,23 +63,29 @@ def get_record_by_id(_user_id, _topic_id):
     with application/json mimetype.
     @raise 404: if topic is not found
     """
-    # TODO: retrieve topics from data store
-    if _topic_id not in TOPIC_STORE:
+    # Retrieve topics from data store
+    topic = topic_service.get_topic_by_id(_user_id, _topic_id)
+
+    # HTTP 404 Not Found
+    if topic is None:
         abort(404)
-    return jsonify(TOPIC_STORE[_topic_id])
+
+    return jsonify(topic)
 
 @topic_api.route('/user/<string:_user_id>/topic/<string:_topic_id>', methods=['DELETE'])
-def delete_record(_user_id, _topic_id):
+def delete_topic(_user_id, _topic_id):
     """Delete a topic record
     @param _user_id: author's identifier
     @param _topic_id: topic identifier
     @return: 204: an empty payload.
     @raise 404: if topic is not found
     """
-    # TODO: remove topic from data store
-    if _topic_id not in TOPIC_STORE:
+    # Remove topic from data store
+    deleted_id = topic_service.delete_topic(_user_id, _topic_id)
+
+    # HTTP 404 Not Found
+    if deleted_id is None:
         abort(404)
 
-    del TOPIC_STORE[_topic_id]
-
+    # HTTP 204 Deleted
     return '', 204

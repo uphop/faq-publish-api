@@ -48,7 +48,6 @@ def get_users():
     """
     # Retrieve users from data store
     users = user_service.get_users()
-
     return jsonify(users)
 
 
