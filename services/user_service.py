@@ -1,44 +1,64 @@
-from data.datastore.user_topic_data_store import UserTopicDataStore
 import uuid
 from datetime import datetime, timedelta
-from utils import log
+from data.datastores.user_topic_data_store import UserTopicDataStore
 
+'''
+Manages user entity.
+'''
 class UserService:
     def __init__(self):
-        
+        # init data store
         self.data_store = UserTopicDataStore()
 
     def create_user(self, name):
+        """Creates a new user.
+        @param name: the full user's name
+        """
+        # check if name not taken yet
+        user_with_same_name = self.get_user_by_name(name)
+        if len(user_with_same_name) > 0:
+            return
+
+        # generate new user identifier and add to data store
         id = str(uuid.uuid4())
         self.data_store.create_user(id, name, datetime.now().timestamp())
         return id
 
     def get_users(self):
-        # retrieve users
+        """Return all users.
+        """
+        # retrieve all users from data store, convert to list and return
         results = self.data_store.get_users()
+        return [self.map_user(id, name, created) for id, name, created, in results]
 
-        # iterate through results and return
-        users = []
-        for row in results:
-            users.append({
-                'name': row.name,
-                'created': row.created
-            })
-
-        return users
-
-    def get_user(self, id):
-        # retrieve user by ID
-        result = self.data_store.get_user(id)
-
-        # if user not found, return None
+    def get_user_by_id(self, id):
+        """Get user by identifier.
+        @param id: user's ID
+        """
+        # retrieve user from data store by ID; if user not found, return None
+        result = self.data_store.get_user_by_id(id)
         if not result is None:
-            # seems like user exists, return details
-            user = {
-                'name': result.name,
-                'created': result.created
-            }
-            return user
+            return self.map_user(result.id, result.name, result.created)
+
+    def get_user_by_name(self, name):
+        """Get user by name.
+        @param name: user's full name
+        """
+        # retrieve user from data store by full name
+        results = self.data_store.get_user_by_name(name)
+        return [self.map_user(id, name, created) for id, name, created, in results]
 
     def delete_user(self, id):
-        return self.data_store.delete_user(id)
+        """Delete user by identifier.
+        @param id: user's ID
+        """
+        # retrieve user from data store by ID; if user not found, return None
+        result = self.data_store.get_user_by_id(id)
+        if not result is None:
+            # delete user from data store by ID
+            return self.data_store.delete_user(id)
+
+    def map_user(self, id, name, created):
+        """Maps data store row to dict.
+        """
+        return {'id': id, 'name': name, 'created': created}

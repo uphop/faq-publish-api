@@ -22,18 +22,23 @@ def create_user():
     """
     # Retrive and parse JSON body
     if not request.get_json():
+        # HTTP 400 Bad Request (missing JSON payload)
         abort(400)
+
     data = request.get_json(force=True)
 
     if not data.get('name'):
+        # HTTP 400 Bad Request (missing name in payload)
         abort(400)
 
     # Store new user
-    user_id = user_service.create_user(data['name'])
+    id = user_service.create_user(data['name'])
+    if not id:
+        # HTTP 409 Conflict (user with the same name exists)
+        abort(409)
 
     # HTTP 201 Created
-    return jsonify({"user_id": user_id}), 201
-
+    return jsonify({"id": id}), 201
 
 @user_api.route('/user', methods=['GET'])
 def get_users():
@@ -48,7 +53,7 @@ def get_users():
 
 
 @user_api.route('/user/<string:_user_id>', methods=['GET'])
-def get_record_by_id(_user_id):
+def get_user_by_id(_user_id):
     """Get user by identifier
     @param _user_id: author's identifier
     @return: 200: a user as a flask/response object \
@@ -56,7 +61,7 @@ def get_record_by_id(_user_id):
     @raise 404: if user is not found
     """
     # Retrieve user from data store
-    user = user_service.get_user(_user_id)
+    user = user_service.get_user_by_id(_user_id)
 
     # HTTP 404 Not Found
     if user is None:
@@ -66,7 +71,7 @@ def get_record_by_id(_user_id):
 
 
 @user_api.route('/user/<string:_user_id>', methods=['DELETE'])
-def delete_record(_user_id):
+def delete_user(_user_id):
     """Delete a user record
     @param _user_id: author's identifier
     @return: 204: an empty payload.

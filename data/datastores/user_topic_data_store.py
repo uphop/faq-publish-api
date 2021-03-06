@@ -1,58 +1,51 @@
 import os
+import logging
+from dotenv import load_dotenv
+load_dotenv()
+
 import sqlalchemy as db
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from data.models.meta import Base
 from data.models.topic_model import Topic
 from data.models.user_model import User
-import logging
 
 class UserTopicDataStore:
     def __init__(self):
-        self.datastore_connection_string = os.environ.get('USER_TOPICS_DATASTORE_CONNECTION_STRING', 'sqlite:///data//datastore/user_topics_local.sqlite3')
-        self.init_datastore()
-        
-    def init_datastore(self):
-        engine = create_engine(self.datastore_connection_string)
+        # init engine
+        USER_TOPICS_DATASTORE_CONNECTION_STRING = os.environ.get('USER_TOPICS_DATASTORE_CONNECTION_STRING', 'sqlite:///data//datastores/local.sqlite3?check_same_thread=False')
+        engine = create_engine(USER_TOPICS_DATASTORE_CONNECTION_STRING)
 
-        # Create all tables in the engine. This is equivalent to "Create Table"
-        # statements in raw SQL.
-        Base = declarative_base()
+        # create all tables in the engine
         Base.metadata.create_all(engine)
 
-        # Bind the engine to the metadata of the Base class so that the
-        # declaratives can be accessed through a DBSession instance
+        # bind the engine to the metadata of the Base class so that the declaratives can be accessed through a DBSession instance
         Base.metadata.bind = engine
 
+        # init database session
         DBSession = sessionmaker(bind=engine)
-        # A DBSession() instance establishes all conversations with the database
-        # and represents a "staging zone" for all the objects loaded into the
-        # database session object. Any change made against the objects in the
-        # session won't be persisted into the database until you call
-        # session.commit(). If you're not happy about the changes, you can
-        # revert all of them back to the last commit by calling
-        # session.rollback()
         self.session = DBSession()
 
     def create_user(self, id, name, created):
         # insert into data store and commit
-        self.session.add(User(user_id=id, name=name, created=created))
+        self.session.add(User(id=id, name=name, created=created))
         self.session.commit()
 
     def get_users(self):
         # select all users
-        return self.session.query(User.name, User.created).all()
+        return self.session.query(User.id, User.name, User.created).all()
 
-    def get_user(self, id):
+    def get_user_by_id(self, id):
         # select user by ID
-        return self.session.query(User.name, User.created).filter(User.user_id == id).one_or_none()
+        return self.session.query(User.id, User.name, User.created).filter(User.id == id).one_or_none()
+
+    def get_user_by_name(self, name):
+        # select user by full name
+        return self.session.query(User.id, User.name, User.created).filter(User.name == name)
 
     def delete_user(self, id):
-        # check if user exists
-        user = self.get_user(id)
+        # delete record from data store and commit
+        self.session.query(User).filter(User.id == id).delete()
+        self.session.commit()
 
-        # if yes, drop that
-        if not user is None:
-            self.session.query(User).filter(User.user_id == id).delete()
-            self.session.commit()
-            return id
+

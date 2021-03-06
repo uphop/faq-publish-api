@@ -12,8 +12,7 @@ from flask_swagger_ui import get_swaggerui_blueprint
 from routes import topic_api, user_api
 
 # init config
-dotenv_path = join(dirname(__file__), '.env')
-load_dotenv(dotenv_path)
+load_dotenv()
 
 # Init Flask app
 FLASK_APP_NAME = os.environ.get('FLASK_APP_NAME', 'faq-publish-api')
@@ -59,6 +58,11 @@ def handle_401_error(_error):
 def handle_404_error(_error):
     """Return a http 404 error to client"""
     return make_response(jsonify({'error': 'Not found'}), 404)
+
+@api.errorhandler(409)
+def handle_409_error(_error):
+    """Return a http 409 error to client"""
+    return make_response(jsonify({'error': 'Conflict'}), 409)
 
 @api.errorhandler(500)
 def handle_500_error(_error):
