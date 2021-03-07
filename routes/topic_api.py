@@ -52,6 +52,11 @@ def get_topics(_user_id):
     """
     # Retrieve topics from data store
     topics = topic_service.get_topics(_user_id)
+    
+    # HTTP 404 Not Found
+    if topics is None:
+        abort(404)
+
     return jsonify(topics)
 
 @topic_api.route('/user/<string:_user_id>/topic/<string:_topic_id>', methods=['GET'])

@@ -19,6 +19,14 @@ class TopicService:
         @param: question: topic's question
         @param: answer: topic's answer
         """
+        # check if question passed
+        if question is None or len(question) == 0:
+            return
+        
+        # check if answer passed
+        if answer is None or len(answer) == 0:
+            return
+
         # check if such user exists
         user = self.get_user(user_id)
         if user is None:
@@ -52,7 +60,11 @@ class TopicService:
         if user is None:
             return
 
-        # retrieve user from data store by ID; if user not found, return None
+        # check if topic ID passed
+        if id is None or len(id) == 0:
+            return
+
+        # retrieve toic from data store by ID; if topic not found, return None
         result = self.data_store.get_topic_by_id(user_id, id)
         if not result is None:
             return self.map_topic(result.user_id, result.id, result.question, result.answer, result.created)
@@ -67,6 +79,10 @@ class TopicService:
         if user is None:
             return
 
+        # check if topic ID passed
+        if id is None or len(id) == 0:
+            return
+
         # retrieve user from data store by ID; if user not found, return None
         result = self.data_store.get_topic_by_id(user_id, id)
         if not result is None:
@@ -75,10 +91,14 @@ class TopicService:
             return id
 
     def get_user(self, user_id):
+        # check if user ID passed
+        if user_id is None or len(user_id) == 0:
+            return
+
         # check if such user exists
         return self.user_service.get_user_by_id(user_id)
 
     def map_topic(self, user_id, id, question, answer, created):
         """Maps data store row to dict.
         """
-        return {'user_id': user_id, 'id': id, 'question': question, 'amswer': answer, 'created': created}
+        return {'user_id': user_id, 'id': id, 'question': question, 'answer': answer, 'created': created}

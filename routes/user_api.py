@@ -57,6 +57,7 @@ def get_user_by_id(_user_id):
     @param _user_id: author's identifier
     @return: 200: a user as a flask/response object \
     with application/json mimetype.
+    @raise 400: missing required parameter
     @raise 404: if user is not found
     """
     # Retrieve user from data store

@@ -39,6 +39,10 @@ class UserService:
         """Get user by identifier.
         @param id: user's ID
         """
+        # check if ID is passed
+        if not id or len(id) == 0:
+            return
+
         # retrieve user from data store by ID; if user not found, return None
         result = self.data_store.get_user_by_id(id)
         if not result is None:
@@ -48,6 +52,10 @@ class UserService:
         """Get user by name.
         @param name: user's full name
         """
+        # check if name is passed
+        if not name or len(name) == 0:
+            return
+
         # retrieve user from data store by full name
         results = self.data_store.get_user_by_name(name)
         return [self.map_user(id, name, created) for id, name, created, in results]
@@ -56,6 +64,10 @@ class UserService:
         """Delete user by identifier.
         @param id: user's ID
         """
+        # check if ID is passed
+        if not id or len(id) == 0:
+            return
+            
         # retrieve user from data store by ID; if user not found, return None
         result = self.data_store.get_user_by_id(id)
         if not result is None:
