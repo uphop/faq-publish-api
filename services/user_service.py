@@ -1,6 +1,8 @@
 import uuid
 from datetime import datetime, timedelta
 from data.datastores.user_data_store import UserDataStore
+import logging
+logger = logging.getLogger(__name__)
 
 '''
 Manages user entity.
@@ -16,18 +18,22 @@ class UserService:
         """
         # check if name is passed
         if not name or len(name) == 0:
+            logger.error('Name is not passed.')
             return
 
         # check if name not taken yet
         user_with_same_name = self.get_user_by_name(name)
         if len(user_with_same_name) == 1:
+            logger.error('Duplicate name is found: ' + str(name))
             return user_with_same_name[0]['id']
         elif len(user_with_same_name) > 1:
+            logger.error('Multiple names are found: ' + str(name))
             return
 
         # generate new user identifier and add to data store
         id = str(uuid.uuid4())
         self.data_store.create_user(id, name, datetime.now().timestamp())
+        logger.debug('Created new user ' + str(id))
         return id
 
     def get_users(self):
@@ -43,6 +49,7 @@ class UserService:
         """
         # check if ID is passed
         if not id or len(id) == 0:
+            logger.error('User ID is not passed.')
             return
 
         # retrieve user from data store by ID; if user not found, return None
@@ -56,6 +63,7 @@ class UserService:
         """
         # check if name is passed
         if not name or len(name) == 0:
+            logger.error('Name is not passed.')
             return
 
         # retrieve user from data store by full name
@@ -68,6 +76,7 @@ class UserService:
         """
         # check if ID is passed
         if not id or len(id) == 0:
+            logger.error('User ID is not passed.')
             return
             
         # retrieve user from data store by ID; if user not found, return None
@@ -75,6 +84,7 @@ class UserService:
         if not result is None:
             # delete user from data store by ID
             self.data_store.delete_user(id)
+            logger.debug('Deleted user ' + str(id))
             return id
 
     def map_user(self, id, name, created):

@@ -2,6 +2,8 @@ import uuid
 from datetime import datetime, timedelta
 from data.datastores.topic_data_store import TopicDataStore
 from services.user_service import UserService
+import logging
+logger = logging.getLogger(__name__)
 
 '''
 Manages topic entity.
@@ -19,31 +21,40 @@ class TopicService:
         @param: question: topic's question
         @param: answer: topic's answer
         """
+        # check if user ID passed
+        if user_id is None or len(user_id) == 0:
+            logger.error('User ID is not passed.')
+            return
+
         # check if question passed
         if question is None or len(question) == 0:
+            logger.error('Question is not passed.')
             return
         
         # check if answer passed
         if answer is None or len(answer) == 0:
+            logger.error('Answer is not passed.')
             return
 
         # check if such user exists
-        user = self.get_user(user_id)
+        user = self.user_service.get_user_by_id(user_id)
         if user is None:
+            logger.error('User is not found: ' + str(user_id))
             return
 
         # generate new topic identifier and add to data store
         id = str(uuid.uuid4())
         self.data_store.create_topic(user_id, id, question, answer, datetime.now().timestamp())
+        logger.debug('Created new topic ' + str(id) + ' for user ' + str(user_id))
         return id
 
     def get_topics(self, user_id):
         """Return all topics for a user.
         @param: user_id: author's identifier
         """
-        # check if such user exists
-        user = self.get_user(user_id)
-        if user is None:
+        # check if user ID passed
+        if user_id is None or len(user_id) == 0:
+            logger.error('User ID is not passed.')
             return
 
         # retrieve all topics from data store, convert to list and return
@@ -55,13 +66,14 @@ class TopicService:
         @param: user_id: author's identifier
         @param id: topic's ID
         """
-        # check if such user exists
-        user = self.get_user(user_id)
-        if user is None:
+        # check if user ID passed
+        if user_id is None or len(user_id) == 0:
+            logger.error('User ID is not passed.')
             return
 
         # check if topic ID passed
         if id is None or len(id) == 0:
+            logger.error('Topic ID is not passed.')
             return
 
         # retrieve toic from data store by ID; if topic not found, return None
@@ -74,13 +86,14 @@ class TopicService:
         @param: user_id: author's identifier
         @param id: topic's ID
         """
-        # check if such user exists
-        user = self.get_user(user_id)
-        if user is None:
+        # check if user ID passed
+        if user_id is None or len(user_id) == 0:
+            logger.error('User ID is not passed.')
             return
 
         # check if topic ID passed
         if id is None or len(id) == 0:
+            logger.error('Topic ID is not passed.')
             return
 
         # retrieve user from data store by ID; if user not found, return None
@@ -88,15 +101,8 @@ class TopicService:
         if not result is None:
             # delete topic from data store by ID
             self.data_store.delete_topic(user_id, id)
+            logger.debug('Deleted topic ' + str(id) + ' for user ' + str(user_id))
             return id
-
-    def get_user(self, user_id):
-        # check if user ID passed
-        if user_id is None or len(user_id) == 0:
-            return
-
-        # check if such user exists
-        return self.user_service.get_user_by_id(user_id)
 
     def map_topic(self, user_id, id, question, answer, created):
         """Maps data store row to dict.

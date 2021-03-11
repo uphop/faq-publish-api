@@ -42,7 +42,7 @@ class SnapshotDataStore:
         # select snapshot by ID
         return self.session.query(Snapshot.user_id, Snapshot.id, Snapshot.created, Snapshot.published).filter(Snapshot.user_id == user_id, Snapshot.id == id).one_or_none()
 
-    def get_snapshot_topics(self, user_id, id):
+    def get_snapshot_topics_by_id(self, user_id, id):
         # select snapshot topics by ID
         return self.session.query(Topic.user_id, Topic.id, Topic.question, Topic.answer, Topic.created).filter(Snapshot.user_id == user_id, Snapshot.id == id, SnapshotTopic.snapshot_id == Snapshot.id, SnapshotTopic.topic_id == Topic.id).all()
 
