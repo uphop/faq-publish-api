@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
-from routes import topic_api, user_api
+from routes import topic_api, user_api, snapshot_api
 
 # init config
 load_dotenv()
@@ -40,8 +40,9 @@ logging.basicConfig(
 
 # Register API blueprints
 api.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
-api.register_blueprint(topic_api.get_blueprint())
 api.register_blueprint(user_api.get_blueprint())
+api.register_blueprint(topic_api.get_blueprint())
+api.register_blueprint(snapshot_api.get_blueprint())
 
 # Default error handlers
 @api.errorhandler(400)

@@ -55,34 +55,5 @@ class TestCreateUser(unittest.TestCase):
         self.assertIsNotNone(body['error'])
         self.assertTrue(body['error'] == 'Misunderstood')
 
-    def test_create_user_duplicate_name(self):
-        user_name = names.get_full_name()
-        payload = {
-            'name': user_name
-        }
-        response = requests.post(self.API_URL, json=payload)
-
-        # check response code and content
-        self.assertIsNotNone(response)
-        self.assertTrue(response.status_code == 201)
-
-        body = response.json()
-        self.assertIsNotNone(body)
-        self.assertIsNotNone(body['id'])
-        self.assertTrue(len(body['id']) > 0)
-
-        # repeat request with the same payload
-        response = requests.post(self.API_URL, json=payload)
-
-        # check response code and content
-        self.assertIsNotNone(response)
-        self.assertTrue(response.status_code == 409)
-
-        body = response.json()
-        self.assertIsNotNone(body)
-        self.assertIsNotNone(body['error'])
-        self.assertTrue(body['error'] == 'Conflict')
-
-
 if __name__ == '__main__':
     unittest.main()

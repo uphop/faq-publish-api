@@ -48,10 +48,8 @@ class TestCreateUser(unittest.TestCase):
         # now try to create user with the same name
         user_id_2 = self.user_service.create_user(user_name)
         # check if ID is not generated
-        self.assertIsNone(user_id_2)
-
-        user = self.user_service.get_user_by_id(user_id_2)
-        self.assertIsNone(user)
+        self.assertIsNotNone(user_id_2)
+        self.assertTrue(user_id == user_id_2)
 
     def test_create_user_empty_name(self):
         user_id = self.user_service.create_user(None)

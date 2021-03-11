@@ -34,8 +34,8 @@ def create_user():
     # Store new user
     id = user_service.create_user(data['name'])
     if not id:
-        # HTTP 409 Conflict (user with the same name exists)
-        abort(409)
+        # HTTP 400 Bad Request (cannot create user)
+        abort(400)
 
     # HTTP 201 Created
     return jsonify({"id": id}), 201

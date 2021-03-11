@@ -20,7 +20,9 @@ class UserService:
 
         # check if name not taken yet
         user_with_same_name = self.get_user_by_name(name)
-        if len(user_with_same_name) > 0:
+        if len(user_with_same_name) == 1:
+            return user_with_same_name[0]['id']
+        elif len(user_with_same_name) > 1:
             return
 
         # generate new user identifier and add to data store
