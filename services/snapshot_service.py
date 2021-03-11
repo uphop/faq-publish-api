@@ -23,17 +23,20 @@ class SnapshotService:
         """
         # check if such user exists
         user = self.get_user(user_id)
-        logger.error('Checking user ID: ' + user_id)
         if user is None:
             return
 
         # get all active topics for the user
         topics = self.topic_service.get_topics(user_id)
-        logger.error('Getting topics for user ID: ' + user_id)
 
         # generate new snapshot identifier and add to data store
         id = str(uuid.uuid4())
         self.data_store.create_snapshot(user_id, id, datetime.now().timestamp(), topics)
+
+        # TODO: send snapshot details to worker, to publish a new broacast bot
+        # get snapshot
+        snapshot = self.get_snapshot_by_id(user_id, id)
+        
         return id
 
     def get_snapshots(self, user_id):
@@ -47,7 +50,7 @@ class SnapshotService:
 
         # retrieve all snapshots from data store, convert to list and return
         results = self.data_store.get_snapshots(user_id)
-        return [self.map_snapshot(user_id, id, created, published, None) for user_id, id, created, published, in results]
+        return [self.map_snapshot(user_id, id, created, published) for user_id, id, created, published, in results]
 
     def get_snapshot_by_id(self, user_id, id):
         """Get snapshot by identifier.
@@ -67,7 +70,9 @@ class SnapshotService:
         snapshot = self.data_store.get_snapshot_by_id(user_id, id)
         if not snapshot is None:
             snapshot_topics = self.data_store.get_snapshot_topics(user_id, id)
-            return self.map_snapshot(snapshot.user_id, snapshot.id, snapshot.created, snapshot.published, snapshot_topics)
+            response = self.map_snapshot(snapshot.user_id, snapshot.id, snapshot.created, snapshot.published)
+            response['topics'] = self.map_snapshot_topics(snapshot_topics)
+            return response
 
     def delete_snapshot(self, user_id, id):
         """Delete snapshot by identifier.
@@ -98,7 +103,7 @@ class SnapshotService:
         # check if such user exists
         return self.user_service.get_user_by_id(user_id)
 
-    def map_snapshot(self, user_id, id, created, published, snapshot_topics):
+    def map_snapshot(self, user_id, id, created, published):
         """Maps data store row to dict.
         """
         response = {
@@ -108,8 +113,8 @@ class SnapshotService:
         }
         if published is not None:
             response['published'] = published
-
-        if snapshot_topics is not None:
-            response['topics'] = [{'question': question, 'answer': answer} for user_id, topic_id, question, answer, created, in snapshot_topics]
-
         return response
+
+    def map_snapshot_topics(self, snapshot_topics):
+        if snapshot_topics is not None:
+            return [{'question': question, 'answer': answer} for user_id, topic_id, question, answer, created, in snapshot_topics]

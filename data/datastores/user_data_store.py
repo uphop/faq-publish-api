@@ -1,13 +1,11 @@
 import os
-import logging
-from dotenv import load_dotenv
-load_dotenv()
-
 import sqlalchemy as db
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from data.models.meta import Base
 from data.models.user_model import User
+import logging
+logger = logging.getLogger(__name__)
 
 class UserDataStore:
     def __init__(self):

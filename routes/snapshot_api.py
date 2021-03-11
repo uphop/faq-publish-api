@@ -3,6 +3,8 @@ import uuid
 from datetime import datetime, timedelta
 from flask import jsonify, abort, request, Blueprint
 from services.snapshot_service import SnapshotService
+import logging
+logger = logging.getLogger(__name__)
 
 # Init API blueprint
 snapshot_api = Blueprint('snapshot_api', __name__)

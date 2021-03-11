@@ -3,6 +3,8 @@ import uuid
 from datetime import datetime, timedelta
 from flask import jsonify, abort, request, Blueprint
 from services.topic_service import TopicService
+import logging
+logger = logging.getLogger(__name__)
 
 # Init API blueprint
 topic_api = Blueprint('topic_api', __name__)

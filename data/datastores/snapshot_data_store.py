@@ -1,8 +1,4 @@
 import os
-import logging
-from dotenv import load_dotenv
-load_dotenv()
-
 import sqlalchemy as db
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -10,6 +6,8 @@ from data.models.meta import Base
 from data.models.snapshot_model import Snapshot
 from data.models.topic_model import Topic
 from data.models.snapshot_topic_model import SnapshotTopic
+from dotenv import load_dotenv
+load_dotenv()
 import logging
 logger = logging.getLogger(__name__)
 

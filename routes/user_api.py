@@ -1,6 +1,8 @@
 """Endpoints to manage FAQ users CRUD requests"""
 from flask import jsonify, abort, request, Blueprint
 from services.user_service import UserService
+import logging
+logger = logging.getLogger(__name__)
 
 # Init API blueprint
 user_api = Blueprint('user_api', __name__)
