@@ -63,7 +63,7 @@ class SnapshotService:
         snapshot = self.get_snapshot_by_id(user_id, id)
 
          # send snapshot details to worker, to publish a new broacast bot
-        self.broadcast_queue.create_broadcast(snapshot)
+        self.broadcast_queue.submit_snapshot(snapshot)
         logger.debug('Snapshot submitted for broadcasting ' + str(id) + ' for user ' + str(user_id))
 
         return id
@@ -80,7 +80,7 @@ class SnapshotService:
         # retrieve all snapshots from data store, convert to list and return
         response = []
         results = self.data_store.get_snapshots(user_id)
-        for user_id, id, created, published, in results:
+        for user_id, id, created, published, broadcast_name, in results:
             snapshot = self.get_snapshot_by_id(user_id, id)
             response.append(snapshot)
         return response
@@ -104,7 +104,7 @@ class SnapshotService:
         snapshot = self.data_store.get_snapshot_by_id(user_id, id)
         if not snapshot is None:
             response = self.map_snapshot(
-                snapshot.user_id, snapshot.id, snapshot.created, snapshot.published)
+                snapshot.user_id, snapshot.id, snapshot.created, snapshot.published, snapshot.broadcast_name)
 
             snapshot_topics = self.data_store.get_snapshot_topics_by_id(
                 user_id, id)
@@ -139,7 +139,40 @@ class SnapshotService:
                      ' for user ' + str(user_id))
         return id
 
-    def map_snapshot(self, user_id, id, created, published):
+    def update_snapshot(self, user_id, id, broadcast_name):
+        """Update snapshot by identifier.
+        @param: user_id: author's identifier
+        @param id: snapshot's ID
+        @param name: broadcast name
+        """
+        # check if user ID passed
+        if user_id is None or len(user_id) == 0:
+            logger.error('User ID is not passed.')
+            return
+
+        # check if snapshot ID passed
+        if id is None or len(id) == 0:
+            logger.error('Snapshot ID is not passed.')
+            return
+
+        # check if broadcast name passed
+        if broadcast_name is None or len(broadcast_name) == 0:
+            logger.error('Broadcast name is not passed.')
+            return
+
+        # retrieve snapshot from data store by ID; if user not found, return None
+        result = self.data_store.get_snapshot_by_id(user_id, id)
+        if result is None:
+            logger.error('Snapshot is not found: ' + str(id))
+            return
+
+        # update snapshot in data store by ID
+        self.data_store.update_snapshot(user_id, id, datetime.now().timestamp(), broadcast_name)
+        logger.debug('Updated snapshot ' + str(id) +
+                     ' for user ' + str(user_id))
+        return id
+
+    def map_snapshot(self, user_id, id, created, published, broadcast_name):
         """Maps data store row to dict.
         """
         response = {
@@ -150,6 +183,9 @@ class SnapshotService:
 
         if published is not None:
             response['published'] = published
+        
+        if broadcast_name is not None:
+            response['broadcast_name'] = broadcast_name
 
         return response
 

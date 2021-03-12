@@ -29,18 +29,18 @@ class SnapshotDataStore:
 
     def create_snapshot(self, user_id, id, created, topics):
         # insert into data store and commit
-        self.session.add(Snapshot(user_id=user_id, id=id, created=created, published=None))
+        self.session.add(Snapshot(user_id=user_id, id=id, created=created, published=None, broadcast_name=None))
         for topic in topics:
             self.session.add(SnapshotTopic(snapshot_id=id, topic_id=topic['id']))
         self.session.commit()
 
     def get_snapshots(self, user_id):
         # select all snapshots
-        return self.session.query(Snapshot.user_id, Snapshot.id, Snapshot.created, Snapshot.published).filter(Snapshot.user_id == user_id)
+        return self.session.query(Snapshot.user_id, Snapshot.id, Snapshot.created, Snapshot.published, Snapshot.broadcast_name).filter(Snapshot.user_id == user_id)
 
     def get_snapshot_by_id(self, user_id, id):
         # select snapshot by ID
-        return self.session.query(Snapshot.user_id, Snapshot.id, Snapshot.created, Snapshot.published).filter(Snapshot.user_id == user_id, Snapshot.id == id).one_or_none()
+        return self.session.query(Snapshot.user_id, Snapshot.id, Snapshot.created, Snapshot.published, Snapshot.broadcast_name).filter(Snapshot.user_id == user_id, Snapshot.id == id).one_or_none()
 
     def get_snapshot_topics_by_id(self, user_id, id):
         # select snapshot topics by ID
@@ -50,6 +50,13 @@ class SnapshotDataStore:
         # delete record from data store and commit
         self.session.query(Snapshot).filter(Snapshot.user_id == user_id, Snapshot.id == id).delete()
         self.session.query(SnapshotTopic).filter(SnapshotTopic.snapshot_id == id).delete()
+        self.session.commit()
+    
+    def update_snapshot(self, user_id, id, published, broadcast_name):
+        # update record in data store and commit
+        snapshot = self.session.query(Snapshot).filter(Snapshot.user_id == user_id, Snapshot.id == id).one_or_none()
+        snapshot.published = published
+        snapshot.broadcast_name = broadcast_name
         self.session.commit()
 
 

@@ -3,6 +3,8 @@ import ruamel
 import ruamel.yaml
 from ruamel.yaml.scalarstring import PreservedScalarString as pss
 import os
+import requests
+import json
 import subprocess
 import logging
 from shutil import copyfile, copytree, rmtree
@@ -26,18 +28,25 @@ class BroadcastService:
         nltk.download('averaged_perceptron_tagger')
         nltk.download('wordnet')
 
-    def create_broadcast(self, snapshot):
-        print('Got snapshot: ' + snapshot['id'])
-        topics = snapshot['topics']
-        self.publish(topics)
+        # load configuration
+        self.PUBLISH_API_BASE_URL = os.getenv('PUBLISH_API_BASE_URL', 'http://localhost:5000')
+
+        self.snapshot = {}
+        self.broadcast_name = ''
+        self.broadcast_id = ''
+        self.broadcast_full_name_with_id = ''
+        self.broadcast_output_folder = ''
 
     """
     Main processing chain of broadcast bot publishing.
     Prepares NLU / domain based on captured FAQs, and trains a replica of broadcast with that training data.
     """
-    def publish(self, items):
-        logger.info('Publishing started.')
+    def publish_snapshot(self, snapshot):
+        logger.info('Got snapshot: ' + snapshot['id'])
+        self.snapshot = snapshot
+        items = snapshot['topics']
 
+        logger.info('Publishing started.')
         self.check_output_folder()
 
         # enrich NLU data with dummy examples
@@ -57,6 +66,9 @@ class BroadcastService:
 
         # train broadcast bot
         self.train_broadcast(broadcast_output)
+
+        # update snapshot
+        self.notify_master()
     
     def check_output_folder(self):
         COACH_OUTPUT = os.getenv("COACH_OUTPUT")
@@ -76,12 +88,11 @@ class BroadcastService:
         # make a copy of NLU template
         COACH_NLU_TEMPLATE = os.getenv("COACH_NLU_TEMPLATE")
         COACH_NLU_OUTPUT = os.getenv("COACH_NLU_OUTPUT")
-        print(os.getcwd())
 
         try:
             copyfile(COACH_NLU_TEMPLATE, COACH_NLU_OUTPUT)
         except OSError as err:
-            print("Error: % s" % err)
+            logger.error("Error: % s" % err)
         logger.info('Copied NLU template.')
 
         # open copied template and load YAML
@@ -188,7 +199,7 @@ class BroadcastService:
         try:
             copyfile(COACH_DOMAIN_TEMPLATE, COACH_DOMAIN_OUTPUT)
         except OSError as err:
-            print("Error: % s" % err)
+            logger.error("Error: % s" % err)
 
         # open copied template and load YAML
         with open(COACH_DOMAIN_OUTPUT, 'r') as stream:
@@ -222,28 +233,28 @@ class BroadcastService:
         # generate broadcast clone name
         logger.info('Cloning broadcast bot.')
 
-        broadcast_name = names.get_full_name()
-        logger.info('Broadcast name: ' + broadcast_name)
+        self.broadcast_name = names.get_full_name()
+        logger.info('Broadcast name: ' + self.broadcast_name)
 
-        broadcast_id = uuid.uuid4().hex
-        logger.info('Broadcast ID: ' + broadcast_id)
+        self.broadcast_id = uuid.uuid4().hex
+        logger.info('Broadcast ID: ' + self.broadcast_id)
 
-        broadcast_full_name_with_id = broadcast_name.replace(
-            " ", "_") + "_" + broadcast_id
-        broadcast_output_folder = COACH_BROADCAST_BOT_OUTPUT + \
-            "/" + broadcast_full_name_with_id
+        self.broadcast_full_name_with_id = self.broadcast_name.replace(
+            " ", "_") + "_" + self.broadcast_id
+        self.broadcast_output_folder = COACH_BROADCAST_BOT_OUTPUT + \
+            "/" + self.broadcast_full_name_with_id
 
         # make a copy of template broadcast folder
         try:
             copytree(
-                COACH_BROADCAST_BOT_TEMPLATE, broadcast_output_folder)
+                COACH_BROADCAST_BOT_TEMPLATE, self.broadcast_output_folder)
         except OSError as err:
-            print("Error: % s" % err)
+            logger.error("Error: % s" % err)
 
-        logger.info('Cloned broadcast bot to folder: ' + broadcast_output_folder)
+        logger.info('Cloned broadcast bot to folder: ' + self.broadcast_output_folder)
 
         # return copied folder path
-        return broadcast_output_folder
+        return self.broadcast_output_folder
 
 
     """
@@ -257,7 +268,7 @@ class BroadcastService:
         try:
             copyfile(broadcast_nlu_file, broadcast_nlu_target_path)
         except OSError as err:
-            print("Error: % s" % err)
+            logger.error("Error: % s" % err)
 
         # copy published file to the target broadcast clone
         COACH_BROADCAST_BOT_DOMAIN_OUTPUT = os.getenv(
@@ -267,7 +278,7 @@ class BroadcastService:
         try:
             copyfile(broadcast_domain_file, broadcast_domain_target_path)
         except OSError as err:
-            print("Error: % s" % err)
+            logger.error("Error: % s" % err)
 
 
     """
@@ -295,14 +306,33 @@ class BroadcastService:
         # run broadcast bot training
         while True:
             output = process.stdout.readline()
-            print(output.strip())
+            logger.info(output.strip())
             # Do something else
             return_code = process.poll()
             if return_code is not None:
                 # Process has finished, read rest of the output
                 for output in process.stdout.readlines():
-                    print(output.strip())
+                    logger.info(output.strip())
                     logger.info('Broadcast bot training completed.')
                 break
 
-        print('Broadcast bot is ready.')
+        logger.info('Broadcast bot is ready.')
+    
+    def notify_master(self):
+        # prepare request
+        self.snapshot
+        request_url = f"{self.PUBLISH_API_BASE_URL}/user/{self.snapshot['user_id']}/snapshot/{self.snapshot['id']}"
+        payload = {
+            'broadcast_name': self.broadcast_name
+        }
+
+        # call publish API
+        try:
+            response = requests.put(request_url, json=payload)
+        except requests.exceptions.HTTPError as err:
+            raise SystemExit(err)
+        
+        # check status code and return result
+        if response.status_code == 201 and response.json():
+            body = response.json()
+            return body.get('id', '')

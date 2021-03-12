@@ -67,6 +67,31 @@ def get_snapshot_by_id(_user_id, _snapshot_id):
 
     return jsonify(snapshot)
 
+@snapshot_api.route('/user/<string:_user_id>/snapshot/<string:_snapshot_id>', methods=['PUT'])
+def update_snapshot(_user_id, _snapshot_id):
+    """Updates a snapshot record
+    @param _user_id: author's identifier
+    @param _snapshot_id: snapshot identifier
+    @return: 204: an empty payload.
+    @raise 404: if snapshot is not found
+    """
+    # Retrive and parse JSON body
+    if not request.get_json():
+        abort(400)
+    data = request.get_json(force=True)
+
+    if not data.get('broadcast_name'):
+        abort(400)
+
+    # Store broadcast details
+    id = snapshot_service.update_snapshot(_user_id, _snapshot_id, data['broadcast_name'])
+    if not id:
+        # HTTP 409 Conflict
+        abort(404)
+
+    # HTTP 204 Deleted
+    return '', 204
+
 @snapshot_api.route('/user/<string:_user_id>/snapshot/<string:_snapshot_id>', methods=['DELETE'])
 def delete_snapshot(_user_id, _snapshot_id):
     """Delete a snapshot record

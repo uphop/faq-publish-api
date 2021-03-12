@@ -11,7 +11,7 @@ class BroadcastQueue:
         self.CELERY_QUEUE = os.environ.get('CELERY_QUEUE', 'publish_queue')
         self.tasks = {}
 
-    def create_broadcast(self, snapshot):
-        result = broadcast_tasks.publish.apply_async(args=[snapshot], queue=self.CELERY_QUEUE, serializer='json')
+    def submit_snapshot(self, snapshot):
+        result = broadcast_tasks.publish_snapshot.apply_async(args=[snapshot], queue=self.CELERY_QUEUE, serializer='json')
         self.tasks[snapshot['id']] = result
         return result.id
