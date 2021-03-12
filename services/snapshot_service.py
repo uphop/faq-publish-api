@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from data.datastores.snapshot_data_store import SnapshotDataStore
 from services.user_service import UserService
 from services.topic_service import TopicService
+from queues.broadcast_queue import BroadcastQueue
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -15,9 +17,10 @@ class SnapshotService:
     def __init__(self):
         # init data store
         self.data_store = SnapshotDataStore()
-        # init user and topic services
+        # init other services
         self.user_service = UserService()
         self.topic_service = TopicService()
+        self.broadcast_queue = BroadcastQueue()
 
     def create_snapshot(self, user_id):
         """Creates a new snapshot.
@@ -59,6 +62,7 @@ class SnapshotService:
         # TODO: send snapshot details to worker, to publish a new broacast bot
         # get snapshot
         snapshot = self.get_snapshot_by_id(user_id, id)
+        self.broadcast_queue.create_broadcast(snapshot)
 
         return id
 

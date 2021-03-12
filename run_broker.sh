@@ -1,0 +1,1 @@
+celery -A broker worker --loglevel=INFO

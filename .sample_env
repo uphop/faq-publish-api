@@ -6,3 +6,6 @@ FLASK_APP_DEBUG=False
 
 [DATA]
 USER_TOPICS_DATASTORE_CONNECTION_STRING=sqlite:///data//datastores/user_topics_local.sqlite3?check_same_thread=False
+
+[QUEUES]
+CELERY_BROKER=pyamqp://guest@localhost//
