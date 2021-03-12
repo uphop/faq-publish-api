@@ -20,7 +20,6 @@ logging.basicConfig(
 # Init Celery broker
 broker = Celery('queues',
              broker=CELERY_BROKER,
-             backend='rpc://',
              include=['queues.broadcast_tasks'])
 
 # Optional configuration, see the application user guide.

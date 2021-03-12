@@ -305,4 +305,4 @@ class BroadcastService:
                     logger.info('Broadcast bot training completed.')
                 break
 
-        pass
+        print('Broadcast bot is ready.')
