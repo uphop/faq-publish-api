@@ -11,9 +11,8 @@ CELERY_BROKER = os.environ.get('CELERY_BROKER', 'pyamqp://guest@localhost//')
 # Enable loging
 logging.root.handlers = []
 logging.basicConfig(
-    encoding='utf-8',
     format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
-    level=logging.INFO,
+    level=logging.DEBUG,
     handlers=[logging.StreamHandler(sys.stdout)]
 )
 
@@ -25,6 +24,11 @@ broker = Celery('queues',
 
 # Optional configuration, see the application user guide.
 broker.conf.update(
+    task_routes = {
+        'queues.broadcast_tasks.publish': {
+            'queue': 'publish_queue'
+        }
+    },
     result_expires=3600,
 )
 

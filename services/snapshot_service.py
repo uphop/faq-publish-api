@@ -59,10 +59,12 @@ class SnapshotService:
         logger.debug('Created new snapshot ' + str(id) +
                      ' for user ' + str(user_id))
 
-        # TODO: send snapshot details to worker, to publish a new broacast bot
         # get snapshot
         snapshot = self.get_snapshot_by_id(user_id, id)
+
+         # send snapshot details to worker, to publish a new broacast bot
         self.broadcast_queue.create_broadcast(snapshot)
+        logger.debug('Snapshot submitted for broadcasting ' + str(id) + ' for user ' + str(user_id))
 
         return id
 

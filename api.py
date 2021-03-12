@@ -32,7 +32,6 @@ SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
 # Enable loging
 logging.root.handlers = []
 logging.basicConfig(
-    encoding='utf-8',
     format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
     level=logging.DEBUG,
     handlers=[logging.StreamHandler(sys.stdout)]

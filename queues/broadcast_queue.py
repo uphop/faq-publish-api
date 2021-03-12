@@ -1,5 +1,4 @@
 from queues import broadcast_tasks
-from dotenv import load_dotenv
 import logging
 logger = logging.getLogger(__name__)
 
@@ -7,9 +6,6 @@ logger = logging.getLogger(__name__)
 Braodcast queue client.
 '''
 class BroadcastQueue:
-    def __init__(self):
-        pass
-
     def create_broadcast(self, snapshot):
-        broadcast_tasks.publish.delay(snapshot)
+        result = broadcast_tasks.publish.apply_async(args=[snapshot], queue='publish_queue', serializer='json')
         return -1
