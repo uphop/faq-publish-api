@@ -9,8 +9,10 @@ class User(Base):
     name = Column(String)
     created = Column(String)
     topics = relationship("Topic", backref=backref("user"))
+    sender_id = Column(String)
 
-    def __init__(self, id, name, created):
+    def __init__(self, id, name, created, sender_id):
         self.id = id
         self.name = name
         self.created = created
+        self.sender_id = sender_id

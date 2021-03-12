@@ -32,9 +32,12 @@ def create_user():
     if not data.get('name'):
         # HTTP 400 Bad Request (missing name in payload)
         abort(400)
+    if not data.get('sender_id'):
+        # HTTP 400 Bad Request (missing sender_id in payload)
+        abort(400)
 
     # Store new user
-    id = user_service.create_user(data['name'])
+    id = user_service.create_user(data['name'], data['sender_id'])
     if not id:
         # HTTP 400 Bad Request (cannot create user)
         abort(400)
@@ -71,9 +74,33 @@ def get_user_by_id(_user_id):
 
     return jsonify(user)
 
+@user_api.route('/user/<string:_user_id>', methods=['PUT'])
+def update_user(_user_id):
+    """Delete a user record
+    @param _user_id: author's identifier
+    @return: 204: an empty payload.
+    @raise 404: if user is not found
+    """
+    # Retrive and parse JSON body
+    if not request.get_json():
+        abort(400)
+    data = request.get_json(force=True)
+
+    if not data.get('sender_id'):
+        abort(400)
+
+    # Remove user from data store
+    updated_id = user_service.update_user(_user_id, data['sender_id'])
+
+    # HTTP 404 Not Found
+    if updated_id is None:
+        abort(404)
+
+    # HTTP 204 Deleted
+    return '', 204
 
 @user_api.route('/user/<string:_user_id>', methods=['DELETE'])
-def delete_user(_user_id):
+def detete_user(_user_id):
     """Delete a user record
     @param _user_id: author's identifier
     @return: 204: an empty payload.
@@ -88,3 +115,4 @@ def delete_user(_user_id):
 
     # HTTP 204 Deleted
     return '', 204
+

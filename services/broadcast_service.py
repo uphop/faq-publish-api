@@ -320,7 +320,6 @@ class BroadcastService:
     
     def notify_master(self):
         # prepare request
-        self.snapshot
         request_url = f"{self.PUBLISH_API_BASE_URL}/user/{self.snapshot['user_id']}/snapshot/{self.snapshot['id']}"
         payload = {
             'broadcast_name': self.broadcast_name
@@ -336,3 +335,4 @@ class BroadcastService:
         if response.status_code == 201 and response.json():
             body = response.json()
             return body.get('id', '')
+

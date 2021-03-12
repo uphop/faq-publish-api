@@ -11,8 +11,6 @@ logger = logging.getLogger(__name__)
 '''
 Manages snapshot entity.
 '''
-
-
 class SnapshotService:
     def __init__(self):
         # init data store
@@ -170,7 +168,12 @@ class SnapshotService:
         self.data_store.update_snapshot(user_id, id, datetime.now().timestamp(), broadcast_name)
         logger.debug('Updated snapshot ' + str(id) +
                      ' for user ' + str(user_id))
+
+        # notify user about completed snapshot update
+        self.user_service.notify_user(user_id, broadcast_name)
+
         return id
+
 
     def map_snapshot(self, user_id, id, created, published, broadcast_name):
         """Maps data store row to dict.

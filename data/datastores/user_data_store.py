@@ -23,26 +23,32 @@ class UserDataStore:
         DBSession = sessionmaker(bind=engine)
         self.session = DBSession()
 
-    def create_user(self, id, name, created):
+    def create_user(self, id, name, created, sender_id):
         # insert into data store and commit
-        self.session.add(User(id=id, name=name, created=created))
+        self.session.add(User(id=id, name=name, created=created, sender_id=sender_id))
         self.session.commit()
 
     def get_users(self):
         # select all users
-        return self.session.query(User.id, User.name, User.created).all()
+        return self.session.query(User.id, User.name, User.created, User.sender_id).all()
 
     def get_user_by_id(self, id):
         # select user by ID
-        return self.session.query(User.id, User.name, User.created).filter(User.id == id).one_or_none()
+        return self.session.query(User.id, User.name, User.created, User.sender_id).filter(User.id == id).one_or_none()
 
     def get_user_by_name(self, name):
         # select user by full name
-        return self.session.query(User.id, User.name, User.created).filter(User.name == name)
+        return self.session.query(User.id, User.name, User.created, User.sender_id).filter(User.name == name)
 
     def delete_user(self, id):
         # delete record from data store and commit
         self.session.query(User).filter(User.id == id).delete()
+        self.session.commit()
+
+    def update_user(self, id, sender_id):
+        # update record in data store and commit
+        user = self.session.query(User).filter(User.id == id).one_or_none()
+        user.sender_id = sender_id
         self.session.commit()
 
 
