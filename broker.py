@@ -7,6 +7,7 @@ from celery import Celery
 # init config
 load_dotenv()
 CELERY_BROKER = os.environ.get('CELERY_BROKER', 'pyamqp://guest@localhost//')
+CELERY_QUEUE = os.environ.get('CELERY_QUEUE', 'publish_queue')
 
 # Enable loging
 logging.root.handlers = []
@@ -26,7 +27,7 @@ broker = Celery('queues',
 broker.conf.update(
     task_routes = {
         'queues.broadcast_tasks.publish': {
-            'queue': 'publish_queue'
+            'queue': CELERY_QUEUE
         }
     },
     result_expires=3600,
