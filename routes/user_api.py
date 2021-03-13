@@ -74,6 +74,24 @@ def get_user_by_id(_user_id):
 
     return jsonify(user)
 
+@user_api.route('/user/sender/<string:_user_sender_id>', methods=['GET'])
+def get_user_by_sender_id(_user_sender_id):
+    """Get user by sender identifier
+    @param _user_sender_id: author's sender identifier
+    @return: 200: a user as a flask/response object \
+    with application/json mimetype.
+    @raise 400: missing required parameter
+    @raise 404: if user is not found
+    """
+    # Retrieve user from data store
+    user = user_service.get_user_by_sender_id(_user_sender_id)
+
+    # HTTP 404 Not Found
+    if user is None:
+        abort(404)
+
+    return jsonify(user)
+
 @user_api.route('/user/<string:_user_id>', methods=['PUT'])
 def update_user(_user_id):
     """Delete a user record

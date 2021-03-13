@@ -83,6 +83,22 @@ class SnapshotService:
             response.append(snapshot)
         return response
 
+    def get_published_snapshot(self, user_id):
+        """Return currenlty published snapshot for a user.
+        @param: user_id: author's identifier
+        """
+        # check if user ID passed
+        if user_id is None or len(user_id) == 0:
+            logger.error('User ID is not passed.')
+            return
+
+        # retrieve all snapshots from data store, convert to list and return
+        results = self.data_store.get_snapshots(user_id)
+        for user_id, id, created, published, broadcast_name, in results:
+            if not published is None and not broadcast_name is None:
+                snapshot = self.get_snapshot_by_id(user_id, id)
+                return snapshot
+
     def get_snapshot_by_id(self, user_id, id):
         """Get snapshot by identifier.
         @param: user_id: author's identifier

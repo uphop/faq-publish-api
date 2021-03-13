@@ -81,6 +81,20 @@ class UserService:
         results = self.data_store.get_user_by_name(name)
         return [self.map_user(id, name, created, sender_id) for id, name, created, sender_id, in results]
 
+    def get_user_by_sender_id(self, sender_id):
+        """Get user by sender ID.
+        @param sender_id: user's sender ID
+        """
+        # check if ID is passed
+        if not sender_id or len(sender_id) == 0:
+            logger.error('User sender ID is not passed.')
+            return
+
+        # retrieve user from data store by ID; if user not found, return None
+        result = self.data_store.get_user_by_sender_id(sender_id)
+        if not result is None:
+            return self.map_user(result.id, result.name, result.created, result.sender_id)
+
     def delete_user(self, id):
         """Delete user by identifier.
         @param id: user's ID

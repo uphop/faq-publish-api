@@ -40,6 +40,10 @@ class UserDataStore:
         # select user by full name
         return self.session.query(User.id, User.name, User.created, User.sender_id).filter(User.name == name)
 
+    def get_user_by_sender_id(self, sender_id):
+        # select user by sender ID
+        return self.session.query(User.id, User.name, User.created, User.sender_id).filter(User.sender_id == sender_id).one_or_none()
+
     def delete_user(self, id):
         # delete record from data store and commit
         self.session.query(User).filter(User.id == id).delete()

@@ -67,6 +67,23 @@ def get_snapshot_by_id(_user_id, _snapshot_id):
 
     return jsonify(snapshot)
 
+@snapshot_api.route('/user/<string:_user_id>/snapshot/published', methods=['GET'])
+def get_published_snapshot(_user_id):
+    """Get publihsed snapshot for a user.
+    @param _user_id: author's identifier
+    @return: 200: a snapshot as a flask/response object \
+    with application/json mimetype.
+    @raise 404: if topic is not found
+    """
+    # Retrieve snapshot from data store
+    snapshot = snapshot_service.get_published_snapshot(_user_id)
+
+    # HTTP 404 Not Found
+    if snapshot is None:
+        abort(404)
+
+    return jsonify(snapshot)
+
 @snapshot_api.route('/user/<string:_user_id>/snapshot/<string:_snapshot_id>', methods=['PUT'])
 def update_snapshot(_user_id, _snapshot_id):
     """Updates a snapshot record
