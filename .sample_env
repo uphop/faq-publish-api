@@ -11,6 +11,9 @@ USER_TOPICS_DATASTORE_CONNECTION_STRING=sqlite:///data//datastores/user_topics_l
 CELERY_BROKER=pyamqp://guest@localhost//
 CELERY_QUEUE=publish_queue
 
+[BOT]
+CAPTURE_BOT_BASE_URL=http://localhost:5005
+
 [BROADCAST]
 # Path to Rasa NLU file template
 COACH_NLU_TEMPLATE=./templates/nlu.yml

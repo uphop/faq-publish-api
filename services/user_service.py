@@ -1,3 +1,4 @@
+import os
 import uuid
 from datetime import datetime, timedelta
 import requests
@@ -12,6 +13,9 @@ class UserService:
     def __init__(self):
         # init data store
         self.data_store = UserDataStore()
+
+        # load configuration
+        self.CAPTURE_BOT_BASE_URL = os.getenv('CAPTURE_BOT_BASE_URL', 'http://localhost:5005')
 
     def create_user(self, name, sender_id):
         """Creates a new user.
@@ -117,13 +121,11 @@ class UserService:
             logger.debug('Updated user ' + str(id))
             return id
 
-    def notify_user(self, id, broadcast_name):
+    def notify_user_snapshot_updated(self, id, broadcast_name):
         user = self.get_user_by_id(id)
 
-        print(f'Notifying user {id}, {user["sender_id"]} about broadcast {broadcast_name}')
-
         # prepare request
-        request_url = f"http://localhost:5005/conversations/{user['sender_id']}/trigger_intent?output_channel=latest"
+        request_url = f"{self.CAPTURE_BOT_BASE_URL}/conversations/{user['sender_id']}/trigger_intent?output_channel=latest"
         payload = {
             'name': 'external_notify_snapshot_published',
             'entities': {

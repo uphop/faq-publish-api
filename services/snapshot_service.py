@@ -170,7 +170,7 @@ class SnapshotService:
                      ' for user ' + str(user_id))
 
         # notify user about completed snapshot update
-        self.user_service.notify_user(user_id, broadcast_name)
+        self.user_service.notify_user_snapshot_updated(user_id, broadcast_name)
 
         return id
 
